@@ -1,5 +1,5 @@
-Com_Sheet is a command line spreadsheet application whcih works by issuing
-commands for doing verious actions to create, edit and do other operations on a spreadsheet.
+Com_Sheet is a command line spreadsheet application which works by issuing
+commands for doing various actions to create, edit and do other operations on a spreadsheet.
 
 To compile, symply run 'gcc uni_records.c'
 
