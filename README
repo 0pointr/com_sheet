@@ -1,0 +1,41 @@
+Com_Sheet is a command line spreadsheet application whcih works by issuing
+commands for doing verious actions to create, edit and do other operations on a spreadsheet.
+
+To compile, symply run 'gcc uni_records.c'
+
+Here's a listing of the supported operations and their corresponding commands.
+You can also access this help during program run time by issuing "help".
+
+Commands::
+
+insert row at begining  :: irb
+row at end              :: ire
+row anywhere            :: ira <position>
+
+delete row at begining  :: drb
+row at end              :: dre
+row anywhere            :: dra <position>
+
+insert column           :: ica <position>
+delete column           :: dca <position>
+
+edit field              :: edf <row identifier> <column name>
+edit label              :: edl <column name>
+search record           :: sch
+sort   record           :: srt
+
+write record (tabular)  :: wrt <filename>
+write record (parsable) :: wrp <filename>
+read record             :: rdf <filename>
+
+show help               :: help
+clear screen            :: cls
+quit                    :: q
+
+Note: position can be a neumerical value or
+'b' stating begining or
+'e' stating end
+Numeric positions start from 1.
+
+Row identifier of a row is the first element of that row.
+

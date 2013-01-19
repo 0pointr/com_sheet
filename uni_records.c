@@ -1,7 +1,7 @@
 /*
   
   Com_Sheet v0.3
-  A commnand line spread sheet application.
+  A commnand line spreadsheet application.
   Author :: Debjoy Das <debd92@gmail.com>
 
   Released under GPL v3
@@ -126,6 +126,7 @@ write record (tabular)  :: wrt <filename>\n\
 write record (parsable) :: wrp <filename>\n\
 read record             :: rdf <filename>\n\
 \n\
+show help               :: help\n\
 clear screen            :: cls\n\
 quit                    :: q\n\
 \n\
