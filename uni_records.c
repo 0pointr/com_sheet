@@ -2,7 +2,10 @@
   
   Com_Sheet v0.3
   A commnand line spread sheet application.
-  Author :: Debajoy Das
+  Author :: Debjoy Das <debd92@gmail.com>
+
+  Released under GPL v3
+  Release date (v0.3) :: 19-01-2013
 
   TODO: Harden file parser with more subtle error checks.
         Add feature to add columns with formulaes.
