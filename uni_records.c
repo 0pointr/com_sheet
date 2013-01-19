@@ -3,6 +3,7 @@
   Com_Sheet v0.3
   A commnand line spreadsheet application.
   Author :: Debjoy Das <debd92@gmail.com>
+            Copyright 2013
 
   Released under GPL v3
   Release date (v0.3) :: 19-01-2013
