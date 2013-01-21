@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include "formulae.h"
+
 #define STR_LEN 100
 #define MAX_FILE_LINE_LEN 200
 
@@ -36,7 +38,7 @@ struct col_lbl {
 typedef struct record rec;
 typedef struct col_lbl label;
 
-enum er_codes { INVALID_POS, REC_NOT_FOUND, FIELD_NOT_FOUND, REC_EMPT, WRITE_FAIL, FAILD_TO_OPEN_STRM, WRONG_COMM_ERR, ABORT_PARSE};
+enum er_codes { INVALID_POS, REC_NOT_FOUND, FIELD_NOT_FOUND, REC_EMPT, WRITE_FAIL, FAILD_TO_OPEN_STRM, WRONG_COMM_ERR, ABORT_PARSE, INVALID_EXPR };
 
 char *yellow = "\E[0;33m";
 char *red = "\E[0;31m";
@@ -96,6 +98,9 @@ void hndl_user_err(int ERR_CODE)
          break;
     case ABORT_PARSE:
          fputs("\nFile not in Com_Sheet parsable format. Aborting.\n\n", stderr);
+         break;
+    case INVALID_EXPR:
+         fputs("\nInvalid expression.\n\n", stderr);
          break;
   }
   fputs(norm, stderr);
@@ -361,6 +366,134 @@ int ins_col(rec **tlist, label **lbl, int *lbl_count, int pos, bool ins)
 
   return 0;
 }
+
+void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
+{
+  if(!*lbl || !*tlist) { hndl_user_err(REC_EMPT); return; }
+
+  label *t_lbl=*lbl;
+  rec *t_list=*tlist;
+
+  /* get new label name and store it */
+  while(t_lbl->link) t_lbl = t_lbl->link;
+
+  char *temp_buff = malloc(STR_LEN);
+  printf("Name label %d: ", *lbl_count+1);
+  getstring(temp_buff, STR_LEN, 'u');
+
+  label *temp = malloc(sizeof(label));
+  strcpy(temp->l_name, temp_buff);
+  temp->link=NULL;
+  t_lbl->link = temp;
+
+  /* allocate space for the char ptrs to new label data */
+  rec *prev_node=NULL, *keep=NULL;
+ /* while(*tlist) 
+  {
+    printf("%p\n", *tlist);
+    if(!(*tlist = realloc(*tlist, sizeof(rec) + (*lbl_count+1 * sizeof(char *)))))
+      hndl_fatal_err("malloc");
+
+    if(!keep) keep=*tlist;
+    if(prev_node) prev_node->link = *tlist;
+    *tlist = (*tlist)->link;
+    prev_node = *tlist;
+    usleep(999999U);
+  }
+  *tlist = t_list; /* restore *tlist */
+  
+
+  char expr_str[STR_LEN], expr_resolved[STR_LEN];
+       
+  fputs("Formulae: ", stdout);
+  getstring(expr_str, STR_LEN, 'n');
+  
+  /* resolve label names with corresponding data and create expression */
+  int expr_len = strlen(expr_str);
+  struct label_cache {  /* build a label data cache so we dont have */
+         char *name;    /* to got through it every time              */ 
+         char *data;
+         } cache[*lbl_count];
+  int indx=0;
+  int fx_indx=0;
+  short init=1;
+
+  t_lbl = *lbl;
+  while(t_lbl) { cache[indx++].name = t_lbl->l_name; t_lbl = t_lbl->link; }
+
+  while(t_list)
+  {
+    bzero(expr_resolved, STR_LEN);
+    for(indx=0; indx<*lbl_count; indx++) 
+      cache[indx].data = t_list->rec_col_ptr[indx];
+
+    indx=0;
+    while(indx <= expr_len)
+    {
+      short match_f=0;
+      int t_indx=0; 
+      char temp_name[STR_LEN];
+           bzero(temp_name, STR_LEN);
+      
+      if(isalpha(expr_str[indx]))
+      {
+        t_indx=0;
+        while(isalpha(expr_str[indx]))
+          temp_name[t_indx++] = expr_str[indx++];
+        temp_name[t_indx] = '\0'; 
+
+        for(t_indx=0; t_indx<*lbl_count; t_indx++)
+        {
+          if(!strcmp(temp_name, cache[t_indx].name))
+          {
+            strcat(expr_resolved, cache[t_indx].data);
+            fx_indx = strlen(expr_resolved);
+            match_f=1; break; 
+          }
+        }
+
+        if(!match_f)  { hndl_user_err(INVALID_EXPR); return; }
+      }
+      else
+        expr_resolved[fx_indx++] = expr_str[indx++];
+    }
+    
+    /*printf("%s\n", expr_resolved);
+    puts("press");
+    getchar();*/
+    char postfx[2*expr_len+1];
+         bzero(postfx, 2*expr_len+1);
+    if(to_postfix(expr_resolved, postfx, 2*expr_len+1))
+      hndl_user_err(INVALID_EXPR);
+    if(init)
+    {
+      while((*tlist))
+      {
+        /* allocate new space for storing ptrs to new labels */
+        *tlist = realloc(*tlist, sizeof(rec) + ((*lbl_count+1) * sizeof(char *)));
+        if(!(*tlist))
+          hndl_fatal_err("malloc");
+
+        if(prev_node) prev_node->link=*tlist;
+        if(!keep) keep = *tlist;
+
+        prev_node = *tlist;
+        (*tlist) = (*tlist)->link;
+      }
+      *tlist = keep;
+      init=0;
+    }
+    float temp_res = evaluate(postfx, 2*expr_len+1);
+
+    char *to_char = malloc(STR_LEN/2 * sizeof(char));
+    sprintf(to_char, "%.2f", temp_res);
+    t_list->rec_col_ptr[*lbl_count] = to_char;
+
+    t_list = t_list->link;
+  }
+  *lbl_count++;
+}
+
 
 void del_col(rec **tlist, label **lbl, int *lbl_count, int pos)
 {
@@ -918,13 +1051,13 @@ int main(void)
     printf("%s==> %s", red, norm);
     getstring(comm_queue, 20, 'n');
 
-    struct op opcodes[18] = { "irb", 1, "ire", 2, "ira", -3,
+    struct op opcodes[19] = { "irb", 1, "ire", 2, "ira", -3,
                               "drb", 4, "dre", 5, "dra", -6,
                               "ica", -7, "dca", -8, 
                               "sch", 9, "srt", 10, "help", 11,
                               "cls", 12, "wrt", -13, "wrp", -14,
                               "rdf", -15, "edf", -16, "edl", -17,
-                              "q", 0 };
+                              "icf", 18, "q", 0 };
     unsigned short indx=0;
     int code=-99, pos;
     char *parse=comm_queue;
@@ -943,7 +1076,7 @@ int main(void)
     if((indx>=2 && temp))
       { hndl_user_err(WRONG_COMM_ERR); continue; }
 
-    for(indx=0; indx<18; indx++)
+    for(indx=0; indx<19; indx++)
     {
       if(!strcmp(tokens[0], opcodes[indx].mne))
         { code = opcodes[indx].num; break; }
@@ -1013,6 +1146,8 @@ int main(void)
         case 16: edit_field(list, lbl, tokens[1], tokens[2], 'r');
                  break;
         case 17: edit_field(list, lbl, NULL, tokens[1], 'l');
+                 break;
+        case 18: ins_formulae_col(&list, &lbl, &lbl_count);
                  break;
         case 0:
           freemem(list, lbl, lbl_count, 'a');
