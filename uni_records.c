@@ -1,6 +1,6 @@
 /*
   
-  Com_Sheet v0.3
+  Com_Sheet v0.4 beta
   A commnand line spreadsheet application.
   Author :: Debjoy Das <debd92@gmail.com>
             Copyright 2013
@@ -9,7 +9,7 @@
   Release date (v0.3) :: 19-01-2013
 
   TODO: Harden file parser with more subtle error checks.
-        Add feature to add columns with formulaes.
+        Add feature to add columns with formulaes. (under dev)
 
 */
 
