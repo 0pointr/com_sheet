@@ -24,8 +24,8 @@ As of com_sheet v0.4 beta, formulae columns can be added only as the last column
 i.e. you can't insert a formulae column anywhere except as the last column.
 Although, more columns can be added after that.
 
-Formulaes can't be edited after once the column has been created.
-But data in formulae fields can be edited, but a warning is shown.
+Formulaes can't be edited after the column has been created.
+Data in formulae fields can be edited, but a warning is shown.
 
 Each time a new row is added, the contents of fx column(s) (if any) for that corresponding row will be automatically generated.
 
