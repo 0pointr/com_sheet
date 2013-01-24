@@ -58,6 +58,8 @@ void ins_row_beg(rec **list, label **lbl, int *lbl_count);
 void ins_row_end(rec **list, rec *f_node, label **lbl, int *lbl_count);
 void ins_row_any(rec **list, label **lbl, int *lbl_count, int pos);
 int ins_col(rec **tlist, label **lbl, int *lbl_count, int pos, bool ins);
+void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count);
+int expr_resolver(rec *tnode, label *t_lbl, char *expr_str, char *expr_resolved, int lbl_count, int expr_len);
 void del_row(rec **list, char op, label *lbl, int lbl_count, int pos);
 void del_col(rec **tlist, label **lbl, int *lbl_count, int pos);
 void list_disp(rec *tlist, label *lbl, char mode);
@@ -223,7 +225,7 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
     else
     {
       char *expr_str = formulaes[temp->l_name[STR_LEN-1]];
-      int expr_len = strlen(expr_str);
+      unsigned int expr_len = strlen(expr_str);
       char expr_resolved[STR_LEN];
            bzero(expr_resolved, STR_LEN);
       expr_resolver(*tnode, entire_lbl, expr_str, expr_resolved, *lbl_count, expr_len);
