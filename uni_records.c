@@ -39,16 +39,16 @@ struct col_lbl {
 typedef struct record rec;
 typedef struct col_lbl label;
 
-enum er_codes { INVALID_POS, REC_NOT_FOUND, FIELD_NOT_FOUND, REC_EMPT, WRITE_FAIL, FAILD_TO_OPEN_STRM, WRONG_COMM_ERR, ABORT_PARSE, INVALID_EXPR };
+enum er_codes { INVALID_POS, REC_NOT_FOUND, FIELD_NOT_FOUND, LBL_NOT_FOUND, REC_EMPT, WRITE_FAIL, FAILD_TO_OPEN_STRM, WRONG_COMM_ERR, ABORT_PARSE };
+
+unsigned int max_label_len=0;
+char *formulaes[MAX_FORMS];
+int fxs=0;
 
 char *yellow = "\E[0;33m";
 char *red = "\E[0;31m";
 char *norm = "\E[0m\017";
 char *bcyan = "\E[1;36m";
-
-unsigned int max_label_len=0;
-char *formulaes[MAX_FORMS];
-int fxs=0;
 
 int hndl_fatal_err(char *msg);
 void hndl_user_err(int ERR_CODE);
@@ -87,6 +87,9 @@ void hndl_user_err(int ERR_CODE)
     case FIELD_NOT_FOUND:
          fputs("\nGiven field doesn't exist.\n\n", stderr);
          break;
+    case LBL_NOT_FOUND:
+         fputs("\nGiven label doesn't exist.\n\n", stderr);
+         break;
     case REC_EMPT:
          fputs("\nRecord is Empty.\n\n", stderr);
          break;
@@ -101,9 +104,6 @@ void hndl_user_err(int ERR_CODE)
          break;
     case ABORT_PARSE:
          fputs("\nFile not in Com_Sheet parsable format. Aborting.\n\n", stderr);
-         break;
-    case INVALID_EXPR:
-         fputs("\nInvalid expression.\n\n", stderr);
          break;
   }
   fputs(norm, stderr);
@@ -145,7 +145,8 @@ Note: position can be a neumerical value or\n\
 'e' stating end\n\
 Numeric positions start from 1.\n\
 \n\
-Row identifier of a row is the first element of that row.\n");
+Row identifier of a row is the first element of that row.\n\
+See FORMULAES for a note on formulaes.\n");
 
 }
 
@@ -470,7 +471,7 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
        
   fputs("Formulae: ", stdout);
   getstring(expr_str, STR_LEN, 'n');
-  /* storing the formulea in a non standard way for future refs. */
+  /* storing a formulea indicator in a non standard way for future refs. */
   temp->l_name[STR_LEN-1] = fxs;
   temp->l_name[STR_LEN-2] = 'f';
   temp->l_name[STR_LEN-3] = '\0';
@@ -486,7 +487,7 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
   
     if(expr_resolver(t_list, temp_lbl, expr_str, expr_resolved, *lbl_count, expr_len))
     { 
-      hndl_user_err(INVALID_EXPR);
+      hndl_user_err(LBL_NOT_FOUND);
       free(temp);
       t_lbl->link = NULL;
       return;
@@ -498,7 +499,6 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
          bzero(postfx, 2*expr_len+1);
     if(to_postfix(expr_resolved, postfx, 2*expr_len+1))
     {
-      hndl_user_err(INVALID_EXPR);
       free(temp);
       t_lbl->link = NULL;
       return;
@@ -654,6 +654,7 @@ void edit_field(rec *tlist, label *lbl, char *row, char *col, char mode)
   int indx=0;
   char temp_buff[STR_LEN];
   label *prev_lbl=NULL;
+  bool fx=0; 
 
   while(lbl)
   {
@@ -668,7 +669,8 @@ void edit_field(rec *tlist, label *lbl, char *row, char *col, char mode)
     puts("Press Enter");
     getchar();
     return; }
-  
+ 
+  if(lbl->l_name[STR_LEN-2] == 'f') fx=1;
   if(mode == 'l')
   {
     printf("\nPrevious field: %s%-*s%s\n", yellow, max_label_len, lbl->l_name, norm);
@@ -678,8 +680,14 @@ void edit_field(rec *tlist, label *lbl, char *row, char *col, char mode)
     lbl = realloc(lbl, sizeof(label) + strlen(temp_buff));
     if(prev_lbl) prev_lbl->link = lbl;
     strcpy(lbl->l_name, temp_buff);
+    if(fx) lbl->l_name[STR_LEN-2] = 'f'; /* restore fx indicator */
     return;
   }
+
+  if(fx) fputs("\nThis is classified as a formulae field. Edit anyway? (y/n): ", stdout);
+  char resp[2];
+  getstring(resp, 2, 'n');
+  if(resp[0] == 'n') return;
 
   match_f=0;
   while(tlist)

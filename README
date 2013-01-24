@@ -17,6 +17,7 @@ row at end              :: dre
 row anywhere            :: dra <position>
 
 insert column           :: ica <position>
+insert formulae column  :: icf
 delete column           :: dca <position>
 
 edit field              :: edf <row identifier> <column name>
@@ -38,4 +39,4 @@ Note: position can be a neumerical value or
 Numeric positions start from 1.
 
 Row identifier of a row is the first element of that row.
-
+See FORMULAES for a note on formulaes.;

@@ -3,12 +3,36 @@
 #include <string.h>
 #include <math.h>
 
+#include "formulae.h"
+#include "color_vars.h"
+
 #define DELIM ' '
+enum { MISSING_O_PAREN, MISSING_C_PAREN, ILLIGAL_OP, INVALID_EXPR };
 
 typedef struct prece {
   char ch;
   int value;
   } prec;
+
+static void error_msg(int er_code);
+static int get_prece(char pop);
+static char deque(char *buff, int *tail);
+static char pop(char *buff, int *top);
+static char push(char *buff, char item, int *top, int top_max);
+
+void error_msg(int er_code)
+{
+  char *err_msgs[] = {
+                "Missing opening parenthesis in expression.",
+                "Missing closing parenthesis in expression.",
+                "Illigal oparator/alien character in expression.",
+                "Invalid expression."
+                };
+
+  printf("\n%s%s%s\n\n", red, err_msgs[er_code], norm);
+  puts("Press Enter");
+  getchar();
+}
 
 int get_prece(char pop)
 {
@@ -78,7 +102,7 @@ int to_postfix(char *work_buff, char *postfx, unsigned exp_len)
     }
     else if(poped == ')')
     {
-      if(last_push_val == -99) return __LINE__;
+      if(last_push_val == -99) { error_msg(INVALID_EXPR); return __LINE__; }
 
       char temp;
 
@@ -88,14 +112,21 @@ int to_postfix(char *work_buff, char *postfx, unsigned exp_len)
         push(postfx, DELIM, &post_top, exp_len);
       }
       
-      if(temp != '(') return __LINE__; /* missing opening parenthesis */
+      if(temp != '(') {
+         error_msg(MISSING_O_PAREN);
+         return __LINE__; /* missing opening parenthesis */
+        }
 
     }
     else /* oparators */
     {
-      if(last_push_val == -99) return __LINE__;
+      if(last_push_val == -99) { error_msg(INVALID_EXPR); return __LINE__; }
 
-      if((curr_pop_val = get_prece(poped)) == -1) return __LINE__; 
+      if((curr_pop_val = get_prece(poped)) == -1)
+      {
+        error_msg(ILLIGAL_OP);
+        return __LINE__; 
+      }
 
       if(last_push_val < curr_pop_val) {
         push(sym_buff, poped, &sym_top, exp_len);
@@ -117,7 +148,10 @@ int to_postfix(char *work_buff, char *postfx, unsigned exp_len)
                  push(postfx, DELIM, &post_top, exp_len);
                }
                else /* alien character */
+               {
+                 error_msg(ILLIGAL_OP);
                  return __LINE__;
+               }
              }
              else
              {
@@ -136,7 +170,7 @@ int to_postfix(char *work_buff, char *postfx, unsigned exp_len)
 
   while((poped = pop(sym_buff, &sym_top)) && poped != -1)
   {
-    if(poped == '(') return 1;
+    if(poped == '(') { error_msg(MISSING_C_PAREN); return 1; }
     push(postfx, poped, &post_top, exp_len);
     push(postfx, DELIM, &post_top, exp_len);
   }
