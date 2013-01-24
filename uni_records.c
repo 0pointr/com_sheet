@@ -124,6 +124,7 @@ delete row at begining  :: drb\n\
        row anywhere     :: dra <position>\n\
 \n\
 insert column           :: ica <position>\n\
+insert formulae column  :: icf\n\
 delete column           :: dca <position>\n\
 \n\
 edit field              :: edf <row identifier> <column name>\n\
@@ -202,7 +203,7 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
     short ser=1;
     char ip_buff[STR_LEN];
     char *temp_buff=NULL;
-    if(temp->l_name[STR_LEN-1] != 'f')
+    if(temp->l_name[STR_LEN-2] != 'f')
     {
       if(ins)
       {
@@ -221,8 +222,6 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
     else
     {
       char *expr_str = formulaes[temp->l_name[STR_LEN-1]];
-      printf("%s\n", expr_str);
-      getchar();
       int expr_len = strlen(expr_str);
       char expr_resolved[STR_LEN];
            bzero(expr_resolved, STR_LEN);
@@ -236,7 +235,7 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
       printf("%.2f\n", temp_res);
       sleep(1);
       char *to_char = malloc(STR_LEN/2 * sizeof(char));
-      sprintf(to_char, "%.2f", temp_res);
+      sprintf(to_char, "%g", temp_res);
       (*tnode)->rec_col_ptr[col_indx++] = to_char;
     }
 
@@ -451,12 +450,12 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
 {
   if(!*lbl || !*tlist) { hndl_user_err(REC_EMPT); return; }
 
-  label *t_lbl=*lbl, *prev_lbl=NULL;
+  label *t_lbl=*lbl;
   rec *t_list=*tlist;
   int col_indx = *lbl_count;
 
   /* get new label name and store it */
-  while(t_lbl->link) { prev_lbl = t_lbl; t_lbl = t_lbl->link; }
+  while(t_lbl->link) t_lbl = t_lbl->link;
 
   char *temp_buff = calloc(1, STR_LEN);
   printf("Name label %d: ", *lbl_count+1);
@@ -480,16 +479,16 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
   char expr_resolved[STR_LEN];
   int expr_len = strlen(expr_str);
   short init=1;
-
+  label *temp_lbl = *lbl;
   while(t_list)
   {
     bzero(expr_resolved, STR_LEN);
   
-    if(expr_resolver(t_list, *lbl, expr_str, expr_resolved, *lbl_count, expr_len))
+    if(expr_resolver(t_list, temp_lbl, expr_str, expr_resolved, *lbl_count, expr_len))
     { 
       hndl_user_err(INVALID_EXPR);
       free(temp);
-      prev_lbl = NULL;
+      t_lbl->link = NULL;
       return;
     }
     /*printf("%s\n", expr_resolved);
@@ -501,7 +500,7 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
     {
       hndl_user_err(INVALID_EXPR);
       free(temp);
-      prev_lbl = NULL;
+      t_lbl->link = NULL;
       return;
     }
 
@@ -522,13 +521,14 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
         (*tlist) = (*tlist)->link;
       }
       *tlist = keep;
+      t_list = *tlist;
 
       init=0;
     }
     float temp_res = evaluate(postfx, 2*expr_len+1);
 
     char *to_char = malloc(STR_LEN/2 * sizeof(char));
-    sprintf(to_char, "%.2f", temp_res);
+    sprintf(to_char, "%g", temp_res);
     t_list->rec_col_ptr[col_indx] = to_char;
 
     t_list = t_list->link;
@@ -536,7 +536,7 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
   formulaes[fxs] = expr_str;
   fxs++;
 
-  *lbl_count++;
+  (*lbl_count)++;
 }
 
 void del_col(rec **tlist, label **lbl, int *lbl_count, int pos)
@@ -597,7 +597,7 @@ void del_col(rec **tlist, label **lbl, int *lbl_count, int pos)
     *tlist = (*tlist)->link;
   }
   *tlist = keep;
-  *lbl_count -= 1;
+  (*lbl_count)--;
 }
 
 void del_row(rec **list, char op, label *lbl, int lbl_count, int pos)
