@@ -221,6 +221,8 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
     else
     {
       char *expr_str = formulaes[temp->l_name[STR_LEN-1]];
+      printf("%s\n", expr_str);
+      getchar();
       int expr_len = strlen(expr_str);
       char expr_resolved[STR_LEN];
            bzero(expr_resolved, STR_LEN);
@@ -231,6 +233,8 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
       to_postfix(expr_resolved, postfx, 2*expr_len+1);
 
       float temp_res = evaluate(postfx, 2*expr_len+1);
+      printf("%.2f\n", temp_res);
+      sleep(1);
       char *to_char = malloc(STR_LEN/2 * sizeof(char));
       sprintf(to_char, "%.2f", temp_res);
       (*tnode)->rec_col_ptr[col_indx++] = to_char;
@@ -348,7 +352,7 @@ int ins_col(rec **tlist, label **lbl, int *lbl_count, int pos, bool ins)
   /* if list is empty, this handles the request far cleanly */
   if(!(*tlist) && ins)
   {
-    prepare_node(tlist, lbl, lbl_count, 0, 0, *tlist, *lbl);
+    prepare_node(tlist, lbl, lbl_count, 0, 0, NULL, NULL);
     return;
   }
 
@@ -386,7 +390,7 @@ int ins_col(rec **tlist, label **lbl, int *lbl_count, int pos, bool ins)
     while(keep)
     {
       /* corresponds:: offset = num of lbls to init, pos = from label pos */
-      prepare_node(&keep, &keep_trav, &offset, pos, 1, *tlist, *lbl);
+      prepare_node(&keep, &keep_trav, &offset, pos, 1, NULL, NULL);
       keep=keep->link;
     }
   }
