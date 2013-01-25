@@ -1,2 +1,7 @@
 TODO: Harden file parser with more subtle error checks.
-      Add feature to add columns with formulaes.
+      Add feature to add columns with formulaes. (added)
+      Implement max_label_len var for each label instead of as a global.(added)
+      Add colors for normal msgs on stdout, feature to customise colors
+        to user preference.
+      Insert fx columns anywhere.
+      Standardize some routines.

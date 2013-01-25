@@ -1,0 +1,34 @@
+Formulaes are algebric expressions that can have as variables the label names that contain neumeric values, numbers, and allowed operators.
+
+Allowed operators::
+'(', ')', '^' , '*', '/', '+', and '-'
+
+Standard operator precedences .i.e. PEMDAS is maintained. (See: http://en.wikipedia.org/wiki/Order_of_operations#Mnemonics)
+
+For example:: for the following table :
+
+name doll cent
+bob  57   32  
+far  77   98  
+
+A valid expression for label four (say, "total") woud be: doll+(cent/100).
+
+or, anything as long as it contains nothing else than names of existing labels, numbers, and the allowed set of operators.
+
+Mathematically invalid expressions like 
+*doll++cent
+doll+(cent/100
+(doll+cent))
+
+will not be evaluated and an appriopriate error message will be shown.
+
+As of com_sheet v0.4 beta, formulae columns can be added only as the last column in the current table.
+i.e. you can't insert a formulae column anywhere except as the last column.
+Although, more columns can be added after that.
+
+Formulaes can't be edited after the column has been created.
+Data in formulae fields can be edited, but a warning is shown.
+
+Each time a new row is added, the contents of fx column(s) (if any) for that corresponding row will be automatically generated.
+
+

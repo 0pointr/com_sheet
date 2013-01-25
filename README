@@ -1,7 +1,8 @@
 Com_Sheet is a command line spreadsheet application which works by issuing
 commands for doing various actions to create, edit and do other operations on a spreadsheet.
 
-To compile, symply run 'gcc uni_records.c'
+To compile, run : make
+            Or,   make debug  to create a debug build
 
 Here's a listing of the supported operations and their corresponding commands.
 You can also access this help during program run time by issuing "help".
@@ -17,6 +18,7 @@ row at end              :: dre
 row anywhere            :: dra <position>
 
 insert column           :: ica <position>
+insert formulae column  :: icf
 delete column           :: dca <position>
 
 edit field              :: edf <row identifier> <column name>
@@ -38,4 +40,4 @@ Note: position can be a neumerical value or
 Numeric positions start from 1.
 
 Row identifier of a row is the first element of that row.
-
+See FORMULAES for a note on formulaes.
