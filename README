@@ -1,7 +1,8 @@
 Com_Sheet is a command line spreadsheet application which works by issuing
 commands for doing various actions to create, edit and do other operations on a spreadsheet.
 
-To compile, symply run 'gcc uni_records.c formulae.c -lm'
+To compile, run : make
+            Or,   make debug  to create a debug build
 
 Here's a listing of the supported operations and their corresponding commands.
 You can also access this help during program run time by issuing "help".

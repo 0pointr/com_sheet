@@ -1,7 +1,9 @@
-Formulaes are algebric expressions that can have as variables the label names that contain neumeric values and allowed operators.
+Formulaes are algebric expressions that can have as variables the label names that contain neumeric values, numbers, and allowed operators.
 
 Allowed operators::
 '(', ')', '^' , '*', '/', '+', and '-'
+
+Standard operator precedences .i.e. PEMDAS is maintained. (See: http://en.wikipedia.org/wiki/Order_of_operations#Mnemonics)
 
 For example:: for the following table :
 
@@ -11,7 +13,7 @@ far  77   98
 
 A valid expression for label four (say, "total") woud be: doll+(cent/100).
 
-or, anything as long as it contains nothing else than names of existing labels and the allowed set of operators.
+or, anything as long as it contains nothing else than names of existing labels, numbers, and the allowed set of operators.
 
 Mathematically invalid expressions like 
 *doll++cent
