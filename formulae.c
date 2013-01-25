@@ -29,7 +29,7 @@ void error_msg(int er_code)
                 "Invalid expression."
                 };
 
-  printf("\n%s%s%s\n\n", red, err_msgs[er_code], norm);
+  fprintf(stderr, "\n%s%s%s\n\n", red, err_msgs[er_code], norm);
   puts("Press Enter");
   getchar();
 }

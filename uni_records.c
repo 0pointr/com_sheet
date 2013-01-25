@@ -25,6 +25,7 @@
 #define STR_LEN 100
 #define MAX_FILE_LINE_LEN 200
 #define MAX_FORMS 50
+#define UPDATE_MAX_LEN(a, b) strlen(a) > b ? strlen(a)+1 : b
 
 struct record {
   struct record *link;
@@ -33,6 +34,7 @@ struct record {
 
 struct col_lbl {
   struct col_lbl *link;
+  int max_len;
   char l_name[];
   };
 
@@ -163,7 +165,7 @@ void getstring(char *name, int b_size, char if_update)
    name[i++] = ch;
   name[i] = '\0';
   if(if_update == 'u' && ((ip_len = strlen(name)) > max_label_len))
-    max_label_len = ip_len;
+    max_label_len = ip_len+1;
 
   /*scanf("%99[A-Za-z ]",name);*/
 }
@@ -216,11 +218,12 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
           if(temp == *lbl) printf("For row %d\n", ser);
       }
       printf("%-*s: ", max_label_len, temp->l_name);
-      getstring(ip_buff, STR_LEN, 'u');
+      getstring(ip_buff, STR_LEN, 'n');
       if(!(temp_buff = malloc(sizeof(ip_buff) + 1)))
         hndl_fatal_err("malloc");
       strcpy(temp_buff, ip_buff);
       (*tnode)->rec_col_ptr[col_indx++] = temp_buff;
+      temp->max_len = UPDATE_MAX_LEN((*tnode)->rec_col_ptr[col_indx-1], temp->max_len);
     }
     else
     {
@@ -340,8 +343,10 @@ int ins_col(rec **tlist, label **lbl, int *lbl_count, int pos, bool ins)
     /* allocate space for storing the label name*/
     if(!(temp = malloc(sizeof(label) + (int)strlen(temp_buff) + 1))) 
       hndl_fatal_err("malloc");
+    temp->max_len=0;
 
     strcpy(temp->l_name, temp_buff);
+    temp->max_len = UPDATE_MAX_LEN(temp_buff, temp->max_len);
 
     if(!trav) temp->link=NULL;
     else temp->link=trav->link;
@@ -465,7 +470,9 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
   getstring(temp_buff, STR_LEN, 'u');
 
   label *temp = malloc(sizeof(label));
+  temp->max_len = 0;
   strcpy(temp->l_name, temp_buff);
+  temp->max_len = UPDATE_MAX_LEN(temp_buff, temp->max_len);
   temp->link=NULL;
   t_lbl->link = temp;
 
@@ -675,13 +682,14 @@ void edit_field(rec *tlist, label *lbl, char *row, char *col, char mode)
   if(lbl->l_name[STR_LEN-2] == 'f') fx=1;
   if(mode == 'l')
   {
-    printf("\nPrevious field: %s%-*s%s\n", yellow, max_label_len, lbl->l_name, norm);
-    printf("\nNew field: ");
+    printf("\nPrevious name: %s%-*s%s\n", yellow, max_label_len, lbl->l_name, norm);
+    printf("\nNew name: ");
     getstring(temp_buff, STR_LEN, 'u');
     
     lbl = realloc(lbl, sizeof(label) + strlen(temp_buff));
     if(prev_lbl) prev_lbl->link = lbl;
     strcpy(lbl->l_name, temp_buff);
+    lbl->max_len = UPDATE_MAX_LEN(temp_buff, lbl->max_len);
     if(fx) lbl->l_name[STR_LEN-2] = 'f'; /* restore fx indicator */
     return;
   }
@@ -703,10 +711,11 @@ void edit_field(rec *tlist, label *lbl, char *row, char *col, char mode)
   printf("\nPrevious value:\n%s%-*s%s: %s\n", yellow, max_label_len, lbl->l_name, norm,\
                                              tlist->rec_col_ptr[indx]);
   printf("\nEnter new value:\n%s%-*s%s: ", yellow, max_label_len, lbl->l_name, norm);
-  getstring(temp_buff, STR_LEN, 'u');
+  getstring(temp_buff, STR_LEN, 'n');
 
   char *data = malloc(strlen(temp_buff));
   strcpy(data, temp_buff);
+  lbl->max_len = UPDATE_MAX_LEN(temp_buff, lbl->max_len);
   free(tlist->rec_col_ptr[indx]);
   tlist->rec_col_ptr[indx] = data;
 }
@@ -840,7 +849,7 @@ void list_disp(rec *tlist, label *lbl, char mode)
   
   if(mode == 't') printf("Current table:\n");
   while(t_lbl) {
-    printf("%s%-*s%s ", yellow, max_label_len, t_lbl->l_name, norm);
+    printf("%s%-*s%s ", yellow, t_lbl->max_len, t_lbl->l_name, norm);
     t_lbl = t_lbl->link;
   }
   t_lbl=lbl;
@@ -848,7 +857,7 @@ void list_disp(rec *tlist, label *lbl, char mode)
   while(tlist)
   { 
     while(t_lbl) { 
-      printf("%-*s ", max_label_len, (char *)tlist->rec_col_ptr[col_indx++]);
+      printf("%-*s ", t_lbl->max_len, (char *)tlist->rec_col_ptr[col_indx++]);
       t_lbl = t_lbl->link;
     }
     if(mode == 's') break;
@@ -880,7 +889,7 @@ void write_record(rec *tlist, label *lbl, int lbl_count, char *f_name, char form
     fprintf(out, "%d %u\n\n", lbl_count, max_label_len);
     while(t_lbl)
     {
-      fprintf(out, "%s%s",t_lbl->l_name, t_lbl->link ? "\n" : "\n\n");
+      fprintf(out, "%s %d%s", t_lbl->l_name, t_lbl->max_len, t_lbl->link ? "\n" : "\n\n");
       t_lbl = t_lbl->link;
     }
     t_lbl=lbl;
@@ -996,6 +1005,20 @@ void read_record(rec **tlist, label **lbl, int *lbl_count, char *f_name)
   while(got_labels<*lbl_count && *looper)
   {
     looper = get_line(looper, temp_buff);
+    
+    tokens[0] = NULL, tokens[1] = NULL;
+    temp=temp_buff;
+    token=temp_buff;
+    
+    indx=0L;
+    while(token && indx<2)
+    {
+      token=strtok(temp, " ");
+      tokens[indx++] = token;
+      temp=NULL;
+    }
+
+    if(!tokens[0]) tokens[0] = "";
 
     label *temp; 
 
@@ -1003,7 +1026,10 @@ void read_record(rec **tlist, label **lbl, int *lbl_count, char *f_name)
       hndl_fatal_err("malloc");
 
     if(!*lbl) *lbl=temp;
-    strcpy(temp->l_name, temp_buff);
+    strcpy(temp->l_name, tokens[0]);
+
+    if(!tokens[1]) temp->max_len = strlen(tokens[0]);
+    else temp->max_len = atoi(tokens[1]);
 
     if(prev_lbl_node) prev_lbl_node->link = temp;
     temp->link=NULL;

@@ -1,18 +1,18 @@
-3 4
+3 10
 
-name
-doll
-cent
+name 7
+state 10
+telephone 12
 
 [START]
-name=bob
-doll=57
-cent=32
+name=dmitri
+state=texas
+telephone=45789854542
 [END]
 
 [START]
-name=far
-doll=77
-cent=98
+name=donus
+state=missisipi
+telephone=547812545478
 [END]
 
