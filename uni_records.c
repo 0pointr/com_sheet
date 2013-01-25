@@ -2,8 +2,8 @@
 * Com_Sheet(v0.4 beta) - uni_records.c
 * Author :: Debjoy Das <debd92@gmail.com>
 *           Copyright (C) 2013
-* Released under      :: GPL v3
-* Release date (v0.3) :: 19-01-2013
+* Released under           :: GPL v3
+* Release date (v0.4 beta) :: 25-01-2013
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
