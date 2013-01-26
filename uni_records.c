@@ -31,7 +31,7 @@
 
 #define STR_LEN 100
 #define MAX_FILE_LINE_LEN 200
-#define MAX_FORMS 50
+#define MAX_FXS 50
 #define UPDATE_MAX_LEN(a, b) strlen(a) > b ? strlen(a)+1 : b
 
 struct record {
@@ -41,6 +41,7 @@ struct record {
 
 struct col_lbl {
   struct col_lbl *link;
+  int fx;
   int max_len;
   char l_name[];
   };
@@ -51,7 +52,7 @@ typedef struct col_lbl label;
 enum er_codes { INVALID_POS, REC_NOT_FOUND, FIELD_NOT_FOUND, LBL_NOT_FOUND, REC_EMPT, WRITE_FAIL, FAILD_TO_OPEN_STRM, WRONG_COMM_ERR, ABORT_PARSE };
 
 unsigned int max_label_len=0;
-char *formulaes[MAX_FORMS];
+char *formulaes[MAX_FXS];
 int fxs=0;
 
 char *yellow = "\E[0;33m";
@@ -215,7 +216,7 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
     short ser=1;
     char ip_buff[STR_LEN];
     char *temp_buff=NULL;
-    if(temp->l_name[STR_LEN-2] != 'f')
+    if(!temp->fx)
     {
       if(ins)
       {
@@ -234,7 +235,7 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
     }
     else
     {
-      char *expr_str = formulaes[temp->l_name[STR_LEN-1]];
+      char *expr_str = formulaes[temp->fx - 1];
       unsigned int expr_len = strlen(expr_str);
       char expr_resolved[STR_LEN];
            bzero(expr_resolved, STR_LEN);
@@ -245,8 +246,8 @@ void prepare_node(rec **tnode, label **lbl, int *lbl_count, int pos, bool ins, r
       to_postfix(expr_resolved, postfx, 2*expr_len+1);
 
       float temp_res = evaluate(postfx, 2*expr_len+1);
-      printf("%.2f\n", temp_res);
-      sleep(1);
+      /*printf("%.2f\n", temp_res);
+      sleep(1);*/
       char *to_char = malloc(STR_LEN/2 * sizeof(char));
       sprintf(to_char, "%g", temp_res);
       (*tnode)->rec_col_ptr[col_indx++] = to_char;
@@ -348,8 +349,9 @@ int ins_col(rec **tlist, label **lbl, int *lbl_count, int pos, bool ins)
     getstring(temp_buff, STR_LEN, 'u');
 
     /* allocate space for storing the label name*/
-    if(!(temp = malloc(sizeof(label) + (int)strlen(temp_buff) + 1))) 
+    if(!(temp = malloc(sizeof(label) + (int)strlen(temp_buff) + 2))) 
       hndl_fatal_err("malloc");
+    temp->fx=0;
     temp->max_len=0;
 
     strcpy(temp->l_name, temp_buff);
@@ -478,6 +480,7 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
 
   label *temp = malloc(sizeof(label));
   temp->max_len = 0;
+  temp->fx = fxs+1;
   strcpy(temp->l_name, temp_buff);
   temp->max_len = UPDATE_MAX_LEN(temp_buff, temp->max_len);
   temp->link=NULL;
@@ -488,9 +491,7 @@ void ins_formulae_col(rec **tlist, label **lbl, int *lbl_count)
   fputs("Formulae: ", stdout);
   getstring(expr_str, STR_LEN, 'n');
   /* storing a formulea indicator in a non standard way for future refs. */
-  temp->l_name[STR_LEN-1] = fxs;
-  temp->l_name[STR_LEN-2] = 'f';
-  temp->l_name[STR_LEN-3] = '\0';
+  int size = strlen(temp_buff);
   
   /* resolve label names to corresponding data and create expression */
   char expr_resolved[STR_LEN];
@@ -572,7 +573,7 @@ void del_col(rec **tlist, label **lbl, int *lbl_count, int pos)
     free_node = trav->link;
     trav->link = trav->link->link;
 
-    if(free_node->l_name[STR_LEN-2] == 'f')
+    if(free_node->fx)
     {
       free(formulaes[free_node->l_name[STR_LEN-1]]);
       fxs--;
@@ -585,7 +586,7 @@ void del_col(rec **tlist, label **lbl, int *lbl_count, int pos)
     free_node = *lbl;
     if((*lbl)->link) *lbl = (*lbl)->link;
     else *lbl=NULL;
-    if(free_node->l_name[STR_LEN-2] == 'f')
+    if(free_node->fx)
     {
       free(formulaes[free_node->l_name[STR_LEN-1]]);
       fxs--;
@@ -670,7 +671,6 @@ void edit_field(rec *tlist, label *lbl, char *row, char *col, char mode)
   int indx=0;
   char temp_buff[STR_LEN];
   label *prev_lbl=NULL;
-  bool fx=0; 
 
   while(lbl)
   {
@@ -686,22 +686,20 @@ void edit_field(rec *tlist, label *lbl, char *row, char *col, char mode)
     getchar();
     return; }
  
-  if(lbl->l_name[STR_LEN-2] == 'f') fx=1;
   if(mode == 'l')
   {
     printf("\nPrevious name: %s%-*s%s\n", yellow, max_label_len, lbl->l_name, norm);
     printf("\nNew name: ");
     getstring(temp_buff, STR_LEN, 'u');
     
-    lbl = realloc(lbl, sizeof(label) + strlen(temp_buff));
+    lbl = realloc(lbl, sizeof(label) + strlen(temp_buff) + 2);
     if(prev_lbl) prev_lbl->link = lbl;
     strcpy(lbl->l_name, temp_buff);
     lbl->max_len = UPDATE_MAX_LEN(temp_buff, lbl->max_len);
-    if(fx) lbl->l_name[STR_LEN-2] = 'f'; /* restore fx indicator */
     return;
   }
 
-  if(fx) fputs("\nThis is classified as a formulae field. Edit anyway? (y/n): ", stdout);
+  if(lbl->fx) fputs("\nThis is classified as a formulae field. Edit anyway? (y/n): ", stdout);
   char resp[2];
   getstring(resp, 2, 'n');
   if(resp[0] == 'n') return;
@@ -884,6 +882,7 @@ void write_record(rec *tlist, label *lbl, int lbl_count, char *f_name, char form
   label *t_lbl=lbl;
   char ch[2];
   rec *temp=tlist;
+  int w_fx=0;
   if(!access(f_name, F_OK)) 
   { 
     printf("%sFile already exists. Overwrite? :(y/n) %s", red, norm);
@@ -896,7 +895,10 @@ void write_record(rec *tlist, label *lbl, int lbl_count, char *f_name, char form
     fprintf(out, "%d %u\n\n", lbl_count, max_label_len);
     while(t_lbl)
     {
-      fprintf(out, "%s %d%s", t_lbl->l_name, t_lbl->max_len, t_lbl->link ? "\n" : "\n\n");
+      fprintf(out, "%s %d %s%s", t_lbl->l_name, t_lbl->max_len,\
+      t_lbl->fx ? formulaes[t_lbl->fx-1] : "n",\
+      t_lbl->link ? "\n" : "\n\n");
+
       t_lbl = t_lbl->link;
     }
     t_lbl=lbl;
@@ -975,10 +977,9 @@ void read_record(rec **tlist, label **lbl, int *lbl_count, char *f_name)
   looper = mem;
   fread(looper, 1, bytes, in);
 
-  long indx;
+  int indx;
   char *tokens[2]={ NULL }, *temp=NULL, *token="ha";
 
-  indx=0;
   looper = get_line(looper, temp_buff);
   temp = temp_buff;
   indx=0;
@@ -1009,16 +1010,17 @@ void read_record(rec **tlist, label **lbl, int *lbl_count, char *f_name)
   int got_labels=0;
   /* create labels */
   label *prev_lbl_node=NULL;
+  fxs=0;
   while(got_labels<*lbl_count && *looper)
   {
     looper = get_line(looper, temp_buff);
     
-    tokens[0] = NULL, tokens[1] = NULL;
+    char *tokens[3] = { NULL };
     temp=temp_buff;
     token=temp_buff;
     
-    indx=0L;
-    while(token && indx<2)
+    indx=0;
+    while(token && indx<3)
     {
       token=strtok(temp, " ");
       tokens[indx++] = token;
@@ -1026,10 +1028,13 @@ void read_record(rec **tlist, label **lbl, int *lbl_count, char *f_name)
     }
 
     if(!tokens[0]) tokens[0] = "";
+    if(!tokens[2]) tokens[2] = "";
 
     label *temp; 
+    
+    size_t alloc_size = strlen(tokens[2]);
 
-    if(!(temp = malloc(sizeof(label) + (int)strlen(temp_buff) + 1))) 
+    if(!(temp = malloc(sizeof(label) + alloc_size+2))) 
       hndl_fatal_err("malloc");
 
     if(!*lbl) *lbl=temp;
@@ -1037,6 +1042,15 @@ void read_record(rec **tlist, label **lbl, int *lbl_count, char *f_name)
 
     if(!tokens[1]) temp->max_len = strlen(tokens[0]);
     else temp->max_len = atoi(tokens[1]);
+
+    if(strcmp(tokens[2],"n"))
+    {
+       char *expr_str=malloc(strlen(tokens[2])+1);
+       strcpy(expr_str, tokens[2]);
+       formulaes[fxs++] = expr_str;
+       temp->fx = fxs;
+    }
+    else temp->fx = 0;
 
     if(prev_lbl_node) prev_lbl_node->link = temp;
     temp->link=NULL;
