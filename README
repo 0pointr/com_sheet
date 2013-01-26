@@ -41,3 +41,12 @@ Numeric positions start from 1.
 
 Row identifier of a row is the first element of that row.
 See FORMULAES for a note on formulaes.
+
+Working with com_sheet ::
+
+You'll generally issue a ire if there's no spreadsheet already.
+It will ask for initial number of columns, their names and then input for
+the first row. Add more rows with ire or irb or ira as needed.
+Add columns with ica. Other commands work as listed. Save the sheet with wrp
+or wrt if/as needed.
+You can also begin by loading a saved com_sheet parsable file form disk with rdf, and do your stuff on the loaded spreadsheet.
