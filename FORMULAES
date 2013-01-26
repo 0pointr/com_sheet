@@ -30,7 +30,14 @@ Although, more columns can be added after that.
 Formulaes can't be edited after the column has been created.
 Data in formulae fields can be edited, but a warning is shown.
 
-Each time a new row is added, the contents of fx column(s) (if any) for that corresponding row will be automatically generated.
+Each time a new row is added, the contents of fx column(s) (if any) for that corresponding
+row will be automatically generated.
+But, if label names that constitute a formulae is edited, the respective formulae will become void.
+As, formulaes internally are stored in the direct form they are given, there'll 
+be no way to resolve the label name to its corresponding neumeric data if it is changed.
+Hence, do not edit label names that have been used in formulaes.
+Also, fields that are used to evaluate a formulae, if changed, the corresponding results will not be updated.
+[ This limitations are to be abolished in the later version ]
 
 Formulaes in the existing spreadsheet will be preserved if saved in com_sheet
 parsable format (with wrp).
