@@ -44,6 +44,7 @@ See FORMULAES for a note on formulaes.
 
 Working with com_sheet ::
 
+Run with : <path_to_executable>/com_sheet
 You'll generally issue a ire/irb if there's no spreadsheet already.
 It will ask for initial number of columns, their names and then input for the first row.
 Add more rows with ire or irb or ira as needed.
