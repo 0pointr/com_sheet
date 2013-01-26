@@ -1,18 +1,28 @@
-3 10
+4 4
 
-name 7
-state 10
-telephone 12
+new 4 n
+now 4 n
+tot 4 new+now
+most 5 now+new
 
 [START]
-name=dmitri
-state=texas
-telephone=45789854542
+new=54
+now=56
+tot=110
+most=110
 [END]
 
 [START]
-name=donus
-state=missisipi
-telephone=547812545478
+new=45
+now=10
+tot=55
+most=55
+[END]
+
+[START]
+new=54
+now=23
+tot=77
+most=77
 [END]
 

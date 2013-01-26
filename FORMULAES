@@ -5,7 +5,7 @@ Allowed operators::
 
 Standard operator precedences .i.e. PEMDAS is maintained. (See: http://en.wikipedia.org/wiki/Order_of_operations#Mnemonics)
 
-For example:: for the following table :
+Example:: for the following table :
 
 name doll cent
 bob  57   32  
@@ -15,7 +15,8 @@ A valid expression for label four (say, "total") woud be: doll+(cent/100).
 
 or, anything as long as it contains nothing else than names of existing labels, numbers, and the allowed set of operators.
 
-Mathematically invalid expressions like 
+Mathematically invalid expressions like :
+
 *doll++cent
 doll+(cent/100
 (doll+cent))
@@ -31,4 +32,5 @@ Data in formulae fields can be edited, but a warning is shown.
 
 Each time a new row is added, the contents of fx column(s) (if any) for that corresponding row will be automatically generated.
 
-
+Formulaes in the existing spreadsheet will be preserved if saved in com_sheet
+parsable format (with wrp).
