@@ -1156,7 +1156,7 @@ int main(void)
  / /   / __ \\/ __ `__ \\     \\__ \\/ __ \\/ _ \\/ _ \\/ __/\n\
 / /___/ /_/ / / / / / /    ___/ / / / /  __/  __/ /_  \n\
 \\____/\\____/_/ /_/ /_/____/____/_/ /_/\\___/\\___/\\__/\n\
-                    /_____/                       v0.3%s\n\n", bcyan, norm);
+                    /_____/                     v0.4 beta%s\n\n", bcyan, norm);
   puts("Enter \"help\" to get a list of commands.");
   while(1)
   {
@@ -1264,7 +1264,7 @@ int main(void)
                  break;
         case 0:
           freemem(list, lbl, lbl_count, 'a');
-          puts("\n\tYou exited Com_Sheet v0.3.\n\tHave a nice day!\n");
+          puts("\n\tYou exited Com_Sheet v0.4 beta.\n\tHave a nice day!\n");
           exit(EXIT_SUCCESS);
     }
       if(list && code != 11) { system("clear"); list_disp(list, lbl, 't'); }
