@@ -1,4 +1,4 @@
-Formulaes are algebric expressions that can have as variables the label names that contain neumeric values, numbers, and allowed operators.
+Formulaes are algebric expressions that can have as variables the column names that contain neumeric values, numbers, and allowed operators.
 
 Allowed operators::
 '(', ')', '^' , '*', '/', '+', and '-'
@@ -11,9 +11,9 @@ name doll cent
 bob  57   32  
 far  77   98  
 
-A valid expression for label four (say, "total") woud be: doll+(cent/100).
+A valid expression for column four (say, "total") woud be: doll+(cent/100).
 
-or, anything as long as it contains nothing else than names of existing labels, numbers, and the allowed set of operators.
+or, anything as long as it contains nothing else than names of existing columns, numbers, and the allowed set of operators.
 
 Mathematically invalid expressions like :
 
@@ -32,10 +32,10 @@ Data in formulae fields can be edited, but a warning is shown.
 
 Each time a new row is added, the contents of fx column(s) (if any) for that corresponding
 row will be automatically generated.
-But, if label names that constitute a formulae is edited, the respective formulae will become void.
+But, if column names that constitute a formulae is edited, the respective formulae will become void.
 As, formulaes internally are stored in the direct form they are given, there'll 
-be no way to resolve the label name to its corresponding neumeric data if it is changed.
-Hence, do not edit label names that have been used in formulaes.
+be no way to resolve the column name to its corresponding neumeric data if it is changed.
+Hence, do not edit column names that have been used in formulaes.
 Also, fields that are used to evaluate a formulae, if changed, the corresponding results will not be updated.
 [ This limitations are to be abolished in the later version ]
 
