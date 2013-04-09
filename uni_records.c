@@ -1,6 +1,6 @@
 /*
 * Com_Sheet(v0.4 beta) - uni_records.c
-* Author :: debd <debd92@gmail.com>
+* Author :: debd <pointer.dev [at] gmail.com>
 *           Copyright (C) 2013
 * Released under           :: GPL v3
 * Release date (v0.4 beta) :: 25-01-2013
